@@ -7,8 +7,6 @@ import numpy as np
 import PIL.Image
 import PIL
 import nltk
-nltk.download('wordnet')
-nltk.download('omw-1.4')
 
 
 def tmp_convert_to_images(obj):
@@ -30,7 +28,8 @@ def txt2img(prompt):
     prompt = prompt.replace('+', ' ')
     print(prompt)
     
-    
+    nltk.download('wordnet')
+    nltk.download('omw-1.4')
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     # model = BigGAN.from_pretrained('biggan-deep-256')
@@ -38,7 +37,6 @@ def txt2img(prompt):
 
     # Prepare a input
     truncation = 0.4
-    prompt = 'soap bubble'
     class_vector = one_hot_from_names([prompt], batch_size=len([prompt]))
     noise_vector = truncated_noise_sample(truncation=truncation, batch_size=len([prompt]))
 
@@ -51,10 +49,12 @@ def txt2img(prompt):
     class_vector = class_vector.to(device)
     model.to(device)
 
+    print("Model Generating")
     # Generate an image
     with torch.no_grad():
         output = model(noise_vector, class_vector, truncation)
 
+    print("Model Generation Finished")
     # If you have a GPU put back on CPU
     output = output.to('cpu')
     image = tmp_convert_to_images(output)[0]
