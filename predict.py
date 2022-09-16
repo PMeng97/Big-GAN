@@ -1,8 +1,7 @@
 import uuid
 
 import torch
-from pytorch_pretrained_biggan import (BigGAN, one_hot_from_names, truncated_noise_sample,
-                                       save_as_images, convert_to_images)
+from pytorch_pretrained_biggan import (BigGAN, one_hot_from_names, truncated_noise_sample)
 import numpy as np
 import PIL.Image
 import PIL

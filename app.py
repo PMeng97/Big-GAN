@@ -1,7 +1,6 @@
 import uuid
 import io
 import flask
-from flask import jsonify
 import os
 import sys
 import json
@@ -20,19 +19,25 @@ def ping_server():
 def txt2img_generation(prompt):
     # Action needed to store records in MongoDB
     print('!!txt2img_generation: Request received')
-    imgs = txt2img(prompt)
+    batch_size = 1
+    imgs = txt2img(prompt, batch_size)
     if imgs == 'wrong class':
-        return jsonify({'result': imgs})
-    response_imgs = []
-    for i in imgs:
+        return flask.jsonify({'result': imgs})
+    if batch_size == 1:
         buf = io.BytesIO()
-        i.save(buf, format='PNG')
+        imgs[0].save(buf, format='PNG')
         img = buf.getvalue()
-        encoded_img = encodebytes(buf.getvalue()).decode('ascii')
-        response_imgs.append(encoded_img)
-    print('!!txt2img_generation: Generation finished')
-#    return flask.Response(img, mimetype='image/png')
-    return jsonify({'result': response_imgs})
+        return flask.Response(img, mimetype='image/png')
+    else:
+        response_imgs = []
+        for i in imgs:
+            buf = io.BytesIO()
+            i.save(buf, format='PNG')
+            img = buf.getvalue()
+            encoded_img = encodebytes(buf.getvalue()).decode('ascii')
+            response_imgs.append(encoded_img)
+        print('!!txt2img_generation: Generation finished')
+        return flask.jsonify({'result': response_imgs})
 
 # if this is the main thread of execution first load the model and
 # then start the server
