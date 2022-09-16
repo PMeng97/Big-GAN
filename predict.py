@@ -26,7 +26,6 @@ def txt2img(prompt):
     # git lfs install
     # git clone https://huggingface.co/osanseviero/BigGAN-deep-128
     prompt = prompt.replace('+', ' ')
-    print(prompt)
 
     try:
         _create_unverified_https_context = ssl._create_unverified_context
@@ -34,7 +33,6 @@ def txt2img(prompt):
         pass
     else:
         ssl._create_default_https_context = _create_unverified_https_context
-    
     nltk.download('wordnet')
     nltk.download('omw-1.4')
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -44,46 +42,35 @@ def txt2img(prompt):
 
     # Prepare a input
     truncation = 0.4
-    class_vector = one_hot_from_names([prompt], batch_size=len([prompt]))
-    noise_vector = truncated_noise_sample(truncation=truncation, batch_size=len([prompt]))
+    try:
+        class_vector = one_hot_from_names([prompt], batch_size=3)
+        noise_vector = truncated_noise_sample(truncation=truncation, batch_size=3)
 
-    # All in tensors
-    noise_vector = torch.from_numpy(noise_vector)
-    class_vector = torch.from_numpy(class_vector)
+        # All in tensors
+        noise_vector = torch.from_numpy(noise_vector)
+        class_vector = torch.from_numpy(class_vector)
 
-    # If you have a GPU, put everything on cuda
-    noise_vector = noise_vector.to(device)
-    class_vector = class_vector.to(device)
-    model.to(device)
+        # If you have a GPU, put everything on cuda
+        noise_vector = noise_vector.to(device)
+        class_vector = class_vector.to(device)
+    except Exception as e:
+        return 'wrong class'
+    else:
+        model.to(device)
 
-    print("Model Generating")
-    # Generate an image
-    with torch.no_grad():
-        output = model(noise_vector, class_vector, truncation)
+        print("Image Generating")
+        # Generate an image
+        with torch.no_grad():
+            output = model(noise_vector, class_vector, truncation)
 
-    print("Model Generation Finished")
-    # If you have a GPU put back on CPU
-    output = output.to('cpu')
-    image = tmp_convert_to_images(output)[0]
+        print("Model Generation Finished")
+        # If you have a GPU put back on CPU
+        output = output.to('cpu')
+        # image = tmp_convert_to_images(output)[0]
+        images = tmp_convert_to_images(output)
 
-    data_id = str(uuid.uuid4())
-    img_name = data_id+'_'+('_').join(prompt.split())
-    # Modification needed for MongoDB
-    image.save(img_name+".png")
-    return image
-
-# RUN THE TWO COMMANDS BELOW FIRST TO CACHE
-# git lfs install
-# git clone https://huggingface.co/CompVis/stable-diffusion-v1-4
-# if torch.cuda.is_available():
-#     print("@@Predict: Starting generation with gpu")
-#     pipe = pipe.to("cuda")
-#     pipe.enable_attention_slicing()
-#     with torch.autocast("cuda"):
-#         image = pipe(prompt).images[0]
-# else:
-#     print("@@Predict: Starting generation with cpu")
-#     pipe = pipe.to("cpu")
-#     pipe.enable_attention_slicing()
-#     image = pipe(prompt).images[0]
-# print('@@Predict: End generation')
+        # data_id = str(uuid.uuid4())
+        # img_name = data_id+'_'+('_').join(prompt.split())
+        # # Modification needed for MongoDB
+        # image.save(img_name+".png")
+        return images
