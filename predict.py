@@ -7,7 +7,7 @@ import numpy as np
 import PIL.Image
 import PIL
 import nltk
-
+import ssl
 
 def tmp_convert_to_images(obj):
     if not isinstance(obj, np.ndarray):
@@ -27,6 +27,13 @@ def txt2img(prompt):
     # git clone https://huggingface.co/osanseviero/BigGAN-deep-128
     prompt = prompt.replace('+', ' ')
     print(prompt)
+
+    try:
+        _create_unverified_https_context = ssl._create_unverified_context
+    except AttributeError:
+        pass
+    else:
+        ssl._create_default_https_context = _create_unverified_https_context
     
     nltk.download('wordnet')
     nltk.download('omw-1.4')

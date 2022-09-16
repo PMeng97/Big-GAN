@@ -22,7 +22,7 @@ def txt2img_generation(prompt):
     generated_img = txt2img(prompt)
     buf = io.BytesIO()
     generated_img.save(buf, format='PNG')
-    img = buf.getValue()
+    img = buf.getvalue()
     print('!!txt2img_generation: Generation finished')
     return flask.Response(img, mimetype='image/png')
 
