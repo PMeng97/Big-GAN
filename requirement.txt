@@ -1,0 +1,6 @@
+requests
+flask
+Pillow
+scipy
+pytorch-pretrained-biggan
+nltk
